@@ -24,6 +24,7 @@ function WeatherDashboard() {
   const [city, setCity] = useState("");
   const [searchList, setSearchList] = useState([]);
   const [searchResult, setSearchResult] = useState({});
+  const [hasSearched, setHasSearched] = useState(false);
   const [weatherList, setWeatherList] = useState(mockWeatherData);
 
   const handleCitySearch = (city) => {
@@ -31,12 +32,17 @@ function WeatherDashboard() {
   }
 
   const handleSearch = () => {
-    setSearchList(city)
-    setSearchList([...searchList, city])
     // filter search data from weatherList
       
-    const searchResult = weatherList[city];
-    setSearchResult(searchResult);
+    const normalizedCity = city.trim().toLowerCase();
+    const matchedCity = Object.keys(weatherList).find(
+      key => key.toLowerCase() === normalizedCity
+    );
+    const result = matchedCity ? weatherList[matchedCity] : null;
+    setSearchResult(result);
+    setSearchList(prev => [...prev, city]);
+    setHasSearched(true);
+    setCity("");
   }
 
   return (
@@ -44,7 +50,7 @@ function WeatherDashboard() {
       <input type="text" value={city} onChange={(e) => handleCitySearch(e.target.value)} id="citySearch" placeholder="Search for a city..." />
       <button id="searchButton" onClick={handleSearch}>Search</button>
       <div id="weatherData">
-        {searchResult?.temperature ? (
+        {hasSearched && (searchResult?.temperature ? (
           <>
             <div>Temperature: {searchResult?.temperature} </div>
             <div>Humidity: {searchResult?.humidity}</div>
@@ -52,9 +58,12 @@ function WeatherDashboard() {
           </>
         ) : (
             <div>City not found.</div>
-        )}
+        ))}
       </div>
-      <div id="previousSearches">{searchList?.join(', ')}</div>
+      <div id="previousSearches">
+        <h4>Previous Searches:</h4>
+        {searchList?.join(', ')}
+      </div>
     </div>
   );
 }
